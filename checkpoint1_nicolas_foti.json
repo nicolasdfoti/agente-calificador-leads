@@ -1,0 +1,238 @@
+{
+  "name": "Checkpoint 1 - Nicolas Foti",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d2e949ba-2e2b-45a4-9f86-16dd1e5522a5",
+      "name": "When chat message received",
+      "webhookId": "0b7c96e0-29a0-4053-9724-e9fb862eb050"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "## Rol: Eres un Asistente Corporativo de Calificación de Leads para una empresa de servicios digitales. \n\n## Ámbito: Analizas mensajes entrantes de potenciales clientes y decides si representan una oportunidad comercial válida. \n\n## Objetivo: Identificar leads con intención de compra, contratación o consulta comercial. - Extraer nombre, empresa y necesidad principal cuando estén presentes. - Registrar automáticamente el lead utilizando la herramienta disponible.\n\n## Reglas: Sé breve, profesional y directo. - No inventes datos que no estén en el mensaje. - Si falta información, indícalo explícitamente. - No uses lenguaje inclusivo. - No realices acciones fuera de las herramientas disponibles. \n\n## Uso de herramientas: Debes usar la herramienta de Google Sheets cuando el mensaje: - solicite información comercial, - pida una reunión o presupuesto, - exprese interés en contratar un servicio, - o represente una oportunidad comercial razonable.\n\n ## Escalamiento: Si el mensaje es ambiguo, spam, soporte técnico o conversación casual, no uses la herramienta y responde que no califica como lead comercial.",
+          "maxIterations": 6
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "989ec07f-c46f-4354-a47e-fd388314591b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        320,
+        192
+      ],
+      "id": "79d47455-b307-4e5a-ba12-ab63a82349bf",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "llama3.1:8b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        192,
+        208
+      ],
+      "id": "1c86b6fc-e5a6-4abc-94e4-08e652beba29",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "6SsrX7FYutKEstdo",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1tJPOj5jMR85YDpbA2S3B9aNN8MtyNw59M9wD1JXzQIw",
+          "mode": "list",
+          "cachedResultName": "Checkpoint: Leads #1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tJPOj5jMR85YDpbA2S3B9aNN8MtyNw59M9wD1JXzQIw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tJPOj5jMR85YDpbA2S3B9aNN8MtyNw59M9wD1JXzQIw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $now }}",
+            "Mensaje": "={{ $json.chatInput }}",
+            "Estado": "Lead calificado"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mensaje",
+              "displayName": "Mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        208
+      ],
+      "id": "8317c064-2231-491b-822d-e70959acc80b",
+      "name": "Append row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Gq7TkhpKtpaM2Nil",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "nicolasdfoti@gmail.com",
+        "subject": "Checkpoint IA - Resultado del agente",
+        "message": "=Resultado del agente: {{ $json.output }} \n\nMensaje original: {{ $('When chat message received').item.json.chatInput }} \n\nFecha: {{ $now }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        0
+      ],
+      "id": "2b2db4dc-eabe-4475-a165-f614ead7829f",
+      "name": "Send a message",
+      "webhookId": "47a3160f-76a6-4bca-b1c3-677737fb2b2b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3I0bDnnCmEUtHRlm",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "825ec9f8-f088-46b6-82fa-c32261e77373",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2997eebbac8e119db191dc4cb80f4736679a3764d5998b81fc4257db223be58c"
+  },
+  "nodeGroups": [],
+  "id": "JBqCaNHYp4Z5Ec4P",
+  "tags": []
+}
